@@ -34,12 +34,16 @@ $listUsers = static function() use ($db) {
 $createUser = static function(ServerRequestInterface $request) use ($db) {
     $user = json_decode((string)$request->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
-    //var_dump($user);
+    var_dump($user);
 
-    return $db->query('INSERT INTO users(name, email) VALUES (?, ?)', $user)
+    return $db->query('INSERT INTO users(name, email) VALUES (:name, :email)', $user)
         ->then(
-            static function() {
-                return new Response(201);
+            static function(SQLiteResult $result) {
+                return new Response(201, [
+                    'Content-Type' => 'application/json',
+                ], json_encode([
+                    'user_id' => $result->insertId,
+                ], JSON_THROW_ON_ERROR, 512));
             },
             static function(Exception $error) {
                 return new Response(400, [
@@ -49,6 +53,7 @@ $createUser = static function(ServerRequestInterface $request) use ($db) {
                 ], JSON_THROW_ON_ERROR, 512));
             }
         );
+
 };
 
 $routes = new RouteCollector(new Std(), new GroupCountBased());
