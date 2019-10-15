@@ -33,6 +33,6 @@ final class Router
                 return $routeInfo[1]($request, ... array_values($params));
         }
 
-        throw new LogicException('Something wrong woth routing.');
+        throw new LogicException('Something wrong with routing.');
     }
 }
