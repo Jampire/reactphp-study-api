@@ -16,6 +16,8 @@ use App\Controller\CreateUserController;
 use App\Controller\ViewUserController;
 use App\Controller\UpdateUserController;
 use App\Controller\DeleteUserController;
+use FriendsOfReact\Http\Middleware\Psr15Adapter\PSR15Middleware;
+use Middlewares\BasicAuthentication;
 
 $loop = LoopFactory::create();
 $dbFactory = new SQLiteFactory($loop);
@@ -29,7 +31,10 @@ $routes->get('/users/{id}', new ViewUserController($users));
 $routes->put('/users/{id}', new UpdateUserController($users));
 $routes->delete('/users/{id}', new DeleteUserController($users));
 
-$server = new Server(new Router($routes));
+$credentials = ['user' => 'secret'];
+$basicAuth = new PSR15Middleware($loop, BasicAuthentication::class, [$credentials,]);
+
+$server = new Server([$basicAuth, new Router($routes)]);
 $socket = new Socket('127.0.0.1:8001', $loop);
 $server->listen($socket);
 
