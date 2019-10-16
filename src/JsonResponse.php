@@ -16,12 +16,12 @@ final class JsonResponse extends Response
         ], $body);
     }
 
-    public static function ok($data): self
+    public static function ok($data = null): self
     {
         return new self(200, $data);
     }
 
-    public static function created($data): self
+    public static function created($data = null): self
     {
         return new self(201, $data);
     }
@@ -29,5 +29,15 @@ final class JsonResponse extends Response
     public static function badRequest(string $error): self
     {
         return new self(400, ['error' => $error]);
+    }
+
+    public static function notFound(string $error): self
+    {
+        return new self(404, ['error' => $error]);
+    }
+
+    public static function noContent(): self
+    {
+        return new self(204);
     }
 }

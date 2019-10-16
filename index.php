@@ -13,6 +13,9 @@ use App\Router;
 use App\Users;
 use App\Controller\ListUsersController;
 use App\Controller\CreateUserController;
+use App\Controller\ViewUserController;
+use App\Controller\UpdateUserController;
+use App\Controller\DeleteUserController;
 
 $loop = LoopFactory::create();
 $dbFactory = new SQLiteFactory($loop);
@@ -22,9 +25,12 @@ $users = new Users($db);
 $routes = new RouteCollector(new Std(), new GroupCountBased());
 $routes->get('/users', new ListUsersController($users));
 $routes->post('/users', new CreateUserController($users));
+$routes->get('/users/{id}', new ViewUserController($users));
+$routes->put('/users/{id}', new UpdateUserController($users));
+$routes->delete('/users/{id}', new DeleteUserController($users));
 
 $server = new Server(new Router($routes));
-$socket = new Socket('127.0.0.1:8000', $loop);
+$socket = new Socket('127.0.0.1:8001', $loop);
 $server->listen($socket);
 
 echo 'Listening on ', str_replace('tcp:', 'http:', $socket->getAddress()), PHP_EOL;
