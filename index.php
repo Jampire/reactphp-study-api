@@ -18,6 +18,10 @@ use App\Controller\UpdateUserController;
 use App\Controller\DeleteUserController;
 use FriendsOfReact\Http\Middleware\Psr15Adapter\PSR15Middleware;
 use Middlewares\BasicAuthentication;
+use App\Auth\JwtAuthenticator;
+use App\Auth\JWTEncoder;
+use App\Auth\Guard;
+use App\Controller\Login;
 
 $loop = LoopFactory::create();
 $dbFactory = new SQLiteFactory($loop);
@@ -32,9 +36,12 @@ $routes->put('/users/{id}', new UpdateUserController($users));
 $routes->delete('/users/{id}', new DeleteUserController($users));
 
 $credentials = ['user' => 'secret'];
-$basicAuth = new PSR15Middleware($loop, BasicAuthentication::class, [$credentials,]);
+//$basicAuth = new PSR15Middleware($loop, BasicAuthentication::class, [$credentials,]);
+$authenticator = new JwtAuthenticator(new JWTEncoder('secret'), $users);
+$routes->post('/login', new Login($authenticator));
+$auth = new Guard('/users', $authenticator);
 
-$server = new Server([$basicAuth, new Router($routes)]);
+$server = new Server([$auth, new Router($routes)]);
 $socket = new Socket('127.0.0.1:8001', $loop);
 $server->listen($socket);
 

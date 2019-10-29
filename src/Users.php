@@ -71,4 +71,18 @@ final class Users
                 }
             );
     }
+
+    public function findByEmail(string $email): PromiseInterface
+    {
+        return $this->db->query('SELECT id, name, email FROM users WHERE email = ?', [$email])
+                        ->then(
+                            static function(SQLiteResult $result) {
+                                if (empty($result->rows)) {
+                                    throw new UserNotFoundError();
+                                }
+
+                                return $result->rows[0];
+                            }
+                        );
+    }
 }
